@@ -13,6 +13,12 @@ def register_user_schema(token: str, message: str, id: str) -> dict:
 
 # Login Schema
 def login_schema(token: str, message: str, id: str):
+    if token == None:
+        return {
+            "status": False,
+            "message": message,
+            "data": None
+        }
     return {
         "status": True,
         "message": message,
