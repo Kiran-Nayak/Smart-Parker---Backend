@@ -19,3 +19,15 @@ def response_schema(dic):
         "message": "Parking lists",
         "data": parking_spots_schema(dic)
     }
+def error_availability_schema():
+    return {
+        "status": False,
+        "message": "Not available",
+        "occupied": None
+    }
+def response_availability_schema(occupied):
+    return {
+        "status": True,
+        "message": "Available",
+        "occupied": occupied
+    }

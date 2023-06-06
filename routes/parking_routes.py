@@ -38,10 +38,10 @@ def getParkings(parking: NearestParking,request: Request):
         auth_key = auth[0]
     if decodeLoginJWT(auth_key) == 1 or decodeLoginJWT(auth_key) == 0:
         collection_name = db["parkings"]
-        min_lat = parking.lat - (0.009 * 2)
-        max_lat = parking.lat + (0.009 * 2)
-        min_lng = parking.lng - ((0.009 * 2) / math.cos(parking.lng * (math.pi / 180)))
-        max_lng = parking.lng + ((0.009 * 2) / math.cos(parking.lng * (math.pi / 180)))
+        min_lat = parking.lat - (0.009 * 5)
+        max_lat = parking.lat + (0.009 * 5)
+        min_lng = parking.lng - ((0.009 * 5) / math.cos(parking.lat * (math.pi / 180)))
+        max_lng = parking.lng + ((0.009 * 5) / math.cos(parking.lat * (math.pi / 180)))
         startIndex = (parking.page - 1) * 10
         todo = response_schema(collection_name.find({
             "$and": [
