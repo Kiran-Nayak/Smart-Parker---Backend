@@ -12,3 +12,4 @@ class GetBookings(BaseModel):
 class Validate(BaseModel):
     user_id: str
     id: str
+    spot_id: str
