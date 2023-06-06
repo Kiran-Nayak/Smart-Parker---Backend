@@ -109,8 +109,11 @@ def getValidate(book: Validate, request: Request):
                 })
                 parking_id = db[f"booking_{book.user_id}"].find_one({"_id": ObjectId(book.id)})["parking_id"]
                 type = db[f"booking_{book.user_id}"].find_one({"_id": ObjectId(book.id)})["type"]
-                print(parking_id)
-                print(type)
+                db[f"{type}_{parking_id}"].find_one_and_update({"_id": ObjectId(book.id)}, {
+                    "$set": {
+                        "is_occupied": False
+                    }
+                })
                 parkingCount = db["parkings"].find_one({"_id": ObjectId(parking_id)})[type]
                 db["parkings"].find_one_and_update({"_id": ObjectId(parking_id)}, {
                     "$set": {
