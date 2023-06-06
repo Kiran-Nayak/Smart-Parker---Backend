@@ -12,6 +12,8 @@ def get_booking_schema(booking):
         "spot_id": booking["spot_id"],
         "parking_name": booking["parking_name"],
         "vehicle_number": booking["vehicle_number"],
+        "latitude": booking["latitude"],
+        "longitude": booking["longitude"]
     }
 
 def get_bookings_schema(bookings):
