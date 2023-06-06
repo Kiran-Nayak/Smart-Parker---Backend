@@ -11,8 +11,7 @@ def get_booking_schema(booking):
         "parking_id": booking["parking_id"],
         "spot_id": booking["spot_id"],
         "parking_name": booking["parking_name"],
-        "vehicle_number": booking["vehicle_number"],
-        "booked_at": booking["booked_at"]
+        "vehicle_number": booking["vehicle_number"]
     }
 
 def get_bookings_schema(bookings):

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, HTTPException
 from auth.jwt_bearer import JWTBearer
 from models.book_parking import *
+from models.bookings import *
 from config.database import db
 from auth.jwt_handler import *
 from schemas.booking_schema import *
@@ -32,7 +33,7 @@ def bookings(book: BookParking, request: Request):
                 "status": False,
                 "message": "unable to book"
             }
-            count -= 1
+            count = count - 1
             db['parkings'].find_one_and_update({"_id": ObjectId(book.parking_id)}, {
                 '$set': {
                     book.vehicle_type: count
@@ -44,18 +45,15 @@ def bookings(book: BookParking, request: Request):
                     "vehicle_number": book.vehicle_number
                 }
             })
-            db[f"booking_{book.user_id}"].insert_one(
-                {
-                    "is_active": True,
-                    "user_id": str(user["_id"]),
-                    "parking_id": str(parking["_id"]),
-                    "spot_id": str(parkingDetails["_id"]),
-                    "parking_name": parking["name"],
-                    "user_name": user["name"],
-                    "vehicle_number": book.vehicle_number,
-                    "booked_at": time.time
-                }
-            )
+            collection = db[f"booking_{book.user_id}"]
+            if collection == None:
+                db.create_collection(name=f"booking_{book.user_id}").insert_one(
+                    dict(Booking(is_active=True, user_id=str(user["_id"]), parking_id=str(parking["_id"]), spot_id=str(parkingDetails["_id"]),parking_name= parking["name"], user_name=user["name"],vehicle_number=book.vehicle_number, type=book.vehicle_type))
+                )
+            else:
+                collection.insert_one(
+                    dict(Booking(is_active=True, user_id=str(user["_id"]), parking_id=str(parking["_id"]), spot_id=str(parkingDetails["_id"]),parking_name= parking["name"], user_name=user["name"],vehicle_number=book.vehicle_number, type=book.vehicle_type))
+                )
             return {
                 "status": True,
                 "message": "booked successfully"
@@ -63,7 +61,7 @@ def bookings(book: BookParking, request: Request):
     else:
         raise HTTPException(401, error_schema("Unauthorized token"))
 
-@book_routes.post("/getBookings", dependencies=[Depends(JWTBearer())])
+@book_routes.post("/getActiveBookings", dependencies=[Depends(JWTBearer())])
 def getBookings(book: GetBookings, request: Request):
     auth = request.headers.get('Authorization').split(" ")
     auth_key = ""
@@ -78,10 +76,10 @@ def getBookings(book: GetBookings, request: Request):
         if user == None:
             return HTTPException(404, error_schema("User not found"))
         else:
-            bookings = get_bookings_schema(db[f"booking_{book.user_id}"].find())
+            bookings = get_bookings_schema(db[f"booking_{book.user_id}"].find({"is_active": True}))
             return {
                 "status": True,
-                "message": "booked successfully",
+                "message": "Active booking list",
                 "data": bookings
             }
     else:
@@ -102,11 +100,21 @@ def getValidate(book: Validate, request: Request):
         if user == None:
             return HTTPException(404, error_schema("User not found"))
         else:
-            data: bool = db[f"booking_{book.user_id}"].find({"_id": ObjectId(book.id)})["is_active"]
+            data: bool = db[f"booking_{book.user_id}"].find_one({"_id": ObjectId(book.id)})["is_active"]
             if data:
                 db[f"booking_{book.user_id}"].find_one_and_update({"_id": ObjectId(book.id)}, {
                     "$set": {
                         "is_active": False
+                    }
+                })
+                parking_id = db[f"booking_{book.user_id}"].find_one({"_id": ObjectId(book.id)})["parking_id"]
+                type = db[f"booking_{book.user_id}"].find_one({"_id": ObjectId(book.id)})["type"]
+                print(parking_id)
+                print(type)
+                parkingCount = db["parkings"].find_one({"_id": ObjectId(parking_id)})[type]
+                db["parkings"].find_one_and_update({"_id": ObjectId(parking_id)}, {
+                    "$set": {
+                        type: parkingCount + 1
                     }
                 })
                 return {
