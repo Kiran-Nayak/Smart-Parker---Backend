@@ -8,3 +8,5 @@ class Booking(BaseModel):
     user_name: str
     vehicle_number: str
     type: str
+    latitude: float
+    longitude: float

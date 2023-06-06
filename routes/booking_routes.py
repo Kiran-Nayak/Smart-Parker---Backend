@@ -48,11 +48,11 @@ def bookings(book: BookParking, request: Request):
             collection = db[f"booking_{book.user_id}"]
             if collection == None:
                 db.create_collection(name=f"booking_{book.user_id}").insert_one(
-                    dict(Booking(is_active=True, user_id=str(user["_id"]), parking_id=str(parking["_id"]), spot_id=str(parkingDetails["_id"]),parking_name= parking["name"], user_name=user["name"],vehicle_number=book.vehicle_number, type=book.vehicle_type))
+                    dict(Booking(is_active=True, user_id=str(user["_id"]), parking_id=str(parking["_id"]), spot_id=str(parkingDetails["_id"]),parking_name= parking["name"], user_name=user["name"],vehicle_number=book.vehicle_number, type=book.vehicle_type, latitude=float(parking["latitude"]), longitude=float(parking["longitude"])))
                 )
             else:
                 collection.insert_one(
-                    dict(Booking(is_active=True, user_id=str(user["_id"]), parking_id=str(parking["_id"]), spot_id=str(parkingDetails["_id"]),parking_name= parking["name"], user_name=user["name"],vehicle_number=book.vehicle_number, type=book.vehicle_type))
+                    dict(Booking(is_active=True, user_id=str(user["_id"]), parking_id=str(parking["_id"]), spot_id=str(parkingDetails["_id"]),parking_name= parking["name"], user_name=user["name"],vehicle_number=book.vehicle_number, type=book.vehicle_type, latitude=float(parking["latitude"]), longitude=float(parking["longitude"])))
                 )
             return {
                 "status": True,
